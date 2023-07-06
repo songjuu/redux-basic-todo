@@ -8,7 +8,9 @@ import "./styles";
 import { StyledDiv } from "./styles";
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
-import { addTodo } from "../../modules/todos";
+// import { addTodo } from "../../modules/todos";
+import { addTodo } from "../../../api/todos";
+import { useMutation, useQueryClient } from "react-query";
 
 /**
  * 컴포넌트 개요 : Todo 메인 페이지에서 제목과 내용을 입력하는 영역
@@ -18,6 +20,15 @@ import { addTodo } from "../../modules/todos";
  */
 function Input() {
   const dispatch = useDispatch();
+
+  //리액트 쿼리 관련 코드
+  const queryClient = useQueryClient();
+  const mutation = useMutation(addTodo, {
+    onSuccess: () => {
+      queryClient.invalidateQueries("todos"); //원래 읽어왔었던 todos로 읽어온 데이터 맞지 않는거야 무효화 시킬게 다시 불러올게
+      console.log("성공했습니다!");
+    },
+  });
 
   // useSelector를 통한, store의 값 접근
   const todos = useSelector((state) => state.todos);
@@ -83,7 +94,8 @@ function Input() {
 
     // todo를 추가하는 reducer 호출
     // 인자 : payload
-    dispatch(addTodo(newTodo));
+    // dispatch(addTodo(newTodo));
+    mutation.mutate(newTodo);
 
     // state 두 개를 초기화
     setTitle("");
